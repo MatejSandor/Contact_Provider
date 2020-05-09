@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.widget.ArrayAdapter
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -28,55 +29,70 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         val hasReadContactPermission = ContextCompat.checkSelfPermission(this, READ_CONTACTS)
-        Log.d(TAG,"onCreate: checkSelfPermission returned $hasReadContactPermission")
+        Log.d(TAG, "onCreate: checkSelfPermission returned $hasReadContactPermission")
 
-        if(hasReadContactPermission == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG,"onCreate: permission granted")
+        if (hasReadContactPermission == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "onCreate: permission granted")
             readGranted = true
         } else {
-            Log.d(TAG,"onCreate: permission denied")
-            ActivityCompat.requestPermissions(this, arrayOf(READ_CONTACTS), REQUEST_CODE_READ_CONTACTS)
+            Log.d(TAG, "onCreate: permission denied")
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(READ_CONTACTS),
+                REQUEST_CODE_READ_CONTACTS
+            )
         }
-
 
 
         fab.setOnClickListener { view ->
-            Log.d(TAG,"fab onClick: called")
-            val projection = arrayOf(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)
-            val cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI,
-                projection,
-                null,
-                null,
-                ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
-            )
+            Log.d(TAG, "fab onClick: called")
 
-            val contacts = ArrayList<String>()
-            cursor?.use {
-                while (it.moveToNext()) {
-                    contacts.add(it.getString(it.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)))
+            if (readGranted) {
+                val projection = arrayOf(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)
+                val cursor = contentResolver.query(
+                    ContactsContract.Contacts.CONTENT_URI,
+                    projection,
+                    null,
+                    null,
+                    ContactsContract.Contacts.DISPLAY_NAME_PRIMARY
+                )
+
+                val contacts = ArrayList<String>()
+                cursor?.use {
+                    while (it.moveToNext()) {
+                        contacts.add(it.getString(it.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)))
+                    }
                 }
+
+                val arrayAdapter =
+                    ArrayAdapter<String>(this, R.layout.contact_detail, R.id.name, contacts)
+                contact_names.adapter = arrayAdapter
+            } else {
+                Snackbar.make(view, "Please grant Access to your contacts", Snackbar.LENGTH_LONG)
+                    .setAction("", null).show()
             }
-
-            val arrayAdapter = ArrayAdapter<String>(this, R.layout.contact_detail,R.id.name,contacts)
-            contact_names.adapter = arrayAdapter
-
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        when(requestCode) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
             REQUEST_CODE_READ_CONTACTS -> {
-                readGranted = if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG,"onRequestPermissionsResult: permission granted")
-                    true
-                } else {
-                    Log.d(TAG,"onRequestPermissionsResult: permission denied")
-                    false
-                }
-                fab.isEnabled = readGranted
+                readGranted =
+                    if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Log.d(TAG, "onRequestPermissionsResult: permission granted")
+                        true
+                    } else {
+                        Log.d(TAG, "onRequestPermissionsResult: permission denied")
+                        false
+                    }
+//                fab.isEnabled = readGranted
             }
         }
-        Log.d(TAG,"onRequestPermissionsResult: ends")
+        Log.d(TAG, "onRequestPermissionsResult: ends")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
