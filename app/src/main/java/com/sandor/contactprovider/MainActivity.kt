@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG,"onRequestPermissionsResult: permission denied")
                     false
                 }
+                fab.isEnabled = readGranted
             }
         }
         Log.d(TAG,"onRequestPermissionsResult: ends")
