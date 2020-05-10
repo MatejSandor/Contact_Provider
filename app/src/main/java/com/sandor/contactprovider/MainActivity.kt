@@ -32,9 +32,7 @@ class MainActivity : AppCompatActivity() {
         val hasReadContactPermission = ContextCompat.checkSelfPermission(this, READ_CONTACTS)
         Log.d(TAG, "onCreate: checkSelfPermission returned $hasReadContactPermission")
 
-        if (hasReadContactPermission == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "onCreate: permission granted")
-        } else {
+        if (hasReadContactPermission != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "onCreate: permission denied")
             ActivityCompat.requestPermissions(
                 this,
@@ -86,22 +84,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            REQUEST_CODE_READ_CONTACTS -> {
-                    if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        Log.d(TAG, "onRequestPermissionsResult: permission granted")
-                    } else {
-                        Log.d(TAG, "onRequestPermissionsResult: permission denied")
-                    }
-            }
-        }
-        Log.d(TAG, "onRequestPermissionsResult: ends")
-    }
+    // Interesting method
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int,
+//        permissions: Array<out String>,
+//        grantResults: IntArray
+//    ) {
+//        when (requestCode) {
+//            REQUEST_CODE_READ_CONTACTS -> {
+//                    if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                        Log.d(TAG, "onRequestPermissionsResult: permission granted")
+//                    } else {
+//                        Log.d(TAG, "onRequestPermissionsResult: permission denied")
+//                    }
+//            }
+//        }
+//        Log.d(TAG, "onRequestPermissionsResult: ends")
+//    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
