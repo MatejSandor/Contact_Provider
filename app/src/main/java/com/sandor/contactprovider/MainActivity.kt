@@ -25,8 +25,6 @@ private const val REQUEST_CODE_READ_CONTACTS = 1
 
 class MainActivity : AppCompatActivity() {
 
-    private var readGranted = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,7 +34,6 @@ class MainActivity : AppCompatActivity() {
 
         if (hasReadContactPermission == PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "onCreate: permission granted")
-            readGranted = true
         } else {
             Log.d(TAG, "onCreate: permission denied")
             ActivityCompat.requestPermissions(
@@ -50,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         fab.setOnClickListener { view ->
             Log.d(TAG, "fab onClick: called")
 
-            if (readGranted) {
+            if (ContextCompat.checkSelfPermission(this, READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
                 val projection = arrayOf(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)
                 val cursor = contentResolver.query(
                     ContactsContract.Contacts.CONTENT_URI,
@@ -96,15 +93,11 @@ class MainActivity : AppCompatActivity() {
     ) {
         when (requestCode) {
             REQUEST_CODE_READ_CONTACTS -> {
-                readGranted =
                     if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         Log.d(TAG, "onRequestPermissionsResult: permission granted")
-                        true
                     } else {
                         Log.d(TAG, "onRequestPermissionsResult: permission denied")
-                        false
                     }
-//                fab.isEnabled = readGranted
             }
         }
         Log.d(TAG, "onRequestPermissionsResult: ends")
