@@ -2,9 +2,12 @@ package com.sandor.contactprovider
 
 
 import android.Manifest.permission.READ_CONTACTS
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
@@ -68,8 +71,20 @@ class MainActivity : AppCompatActivity() {
                     ArrayAdapter<String>(this, R.layout.contact_detail, R.id.name, contacts)
                 contact_names.adapter = arrayAdapter
             } else {
-                Snackbar.make(view, "Please grant Access to your contacts", Snackbar.LENGTH_LONG)
-                    .setAction("", null).show()
+                Snackbar.make(view, "Please grant Access to your contacts", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Grant Access") {
+                        Log.d(TAG, "onCreate: snackBar clicked")
+                        if(ActivityCompat.shouldShowRequestPermissionRationale(this, READ_CONTACTS)) {
+                            Log.d(TAG, "snackBar onClick: calling requestPermissions")
+                            ActivityCompat.requestPermissions(this, arrayOf(READ_CONTACTS), REQUEST_CODE_READ_CONTACTS)
+                        } else {
+                            val intent = Intent()
+                            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                            val uri = Uri.fromParts("package",this.packageName,null)
+                            intent.data = uri
+                            this.startActivity(intent)
+                        }
+                    }.show()
             }
         }
     }
